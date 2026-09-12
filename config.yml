@@ -1,0 +1,93 @@
+# McBot 配置
+# 填好 deepseek.api-key 之后重载或重启即可生效。留空则只使用本地台词（不花 token）。
+
+deepseek:
+  api-key: "在这里填入你的 DeepSeek API Key"
+  base-url: "https://api.deepseek.com"
+  model: "deepseek-chat"
+  temperature: 1.35
+  max-tokens: 180
+  timeout-seconds: 25
+
+bot:
+  # 公屏上的说话人前缀，效果是「幽灵：内容」
+  color-prefix: "§5幽灵§r："
+  # 公屏骚扰时走 AI 的概率，其余用下面的本地台词
+  # 想彻底不花钱就设成 0：公屏只念本地台词，只有被 @ 才调用 AI
+  ai-chance: 0.35
+  # 同一个人连续 @ 的冷却，避免刷屏
+  reply-cooldown-seconds: 8
+
+mischief:
+  # 是否启用"时不时出来骚扰玩家"
+  enabled: true
+  # 基础间隔（秒），实际间隔 = interval ± jitter 随机
+  interval-seconds: 300
+  jitter-seconds: 240
+  # 到达触发点时，有多大把握真的动手
+  chance: 0.6
+  # 至少要有多少人在线才动手
+  min-players: 1
+  # 是否允许骚扰 OP（默认不惹管理员）
+  target-ops: false
+  # 有多大比例只私聊给某个人看，其余在公屏说
+  private-chance: 0.0
+
+# 只有被 @ 才回复 —— 这是省钱的关键：其余聊天完全不检测、不调用 API
+mention:
+  triggers:
+    - "@yl"
+    - "@幽灵"
+  # 超过这个间隔才允许再次回复同一个人
+  cooldown-seconds: 6
+
+# 它公屏说完话后，会盯着接下来的第一条玩家发言
+guide:
+  enabled: true
+  # 监视窗口（秒）：窗口内第一条玩家发言会被它接住
+  window-seconds: 90
+  # 接住之后告诉玩家怎么和它说话。固定文案，不花 token
+  message: "想跟我说话？直接 @yl 你要说的内容，我就听得见。"
+  # 想让这句话也由 AI 生成就改成 true（会花钱）
+  use-ai: false
+
+actions:
+  sounds:
+    enabled: true
+    # 只允许播放列表内的音效（模型不能自由发挥）
+    allowed:
+      - "entity.experience_orb.pickup"
+      - "entity.enderman.stare"
+      - "entity.creeper.primed"
+      - "block.note_block.pling"
+      - "block.note_block.bass"
+      - "entity.ghast.scream"
+      - "entity.cat.purreow"
+      - "entity.villager.no"
+      - "ambient.cave"
+      - "entity.item.pickup"
+  titles:
+    enabled: true
+  commands:
+    # 允许 AI 执行控制台指令（危险指令在代码里还有一层硬拦截）
+    enabled: true
+    allowed:
+      - "me"
+      - "say"
+      - "title"
+      - "playsound"
+      - "weather"
+      - "time"
+
+# 本地台词：不调用 API 时随机挑选，也可以作为 AI 失败时的兜底
+lines:
+  - "有人吗……我好像听见脚步声了。"
+  - "刚刚谁在挖矿？我听见了。"
+  - "别站在那个方块的边上，我说真的。"
+  - "今天天气不错，适合在家挂机。"
+  - "我数了数你们的箱子，收获还行。"
+  - "有人在吗，没事，就是随便问问。"
+  - "我什么都没干，真的。"
+  - "刚才那声响不是我弄的。"
+  - "我记得这里以前不长这样。"
+  - "别回头。开玩笑的。"
