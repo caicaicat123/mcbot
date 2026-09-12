@@ -8,7 +8,7 @@
 ## 安装
 
 1. 编译：`powershell -File build.ps1`（首次先跑 `node tools\fetch-libs.cjs` 下载编译依赖）
-2. 把 `dist\mcbot-1.3.0.jar` 放进服务器的 `plugins\` 目录
+2. 把 `dist\mcbot-1.3.1.jar` 放进服务器的 `plugins\` 目录
 3. 启动或重启服务器，会生成 `plugins\McBot\config.yml`
 4. 在配置里填 `deepseek.api-key`，然后 `/mcbot reload`（或重启）
 

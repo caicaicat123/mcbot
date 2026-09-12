@@ -33,6 +33,7 @@ public final class Brain {
         sb.append("  ACTION: NONE\n");
         if (!allowedSounds.isEmpty()) {
             sb.append("  ACTION: SOUND <音效>，音效只能从这里选：").append(String.join(", ", allowedSounds)).append('\n');
+            sb.append("  注意 SOUND 这个词不能省，正确写法例如：ACTION: SOUND ").append(allowedSounds.get(0)).append('\n');
         }
         if (!allowedCommands.isEmpty()) {
             sb.append("  ACTION: TITLE <文字>（在玩家屏幕中央闪一行字）\n");

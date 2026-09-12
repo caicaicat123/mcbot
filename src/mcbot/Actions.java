@@ -30,6 +30,13 @@ public final class Actions {
         }
         String type = reply.actionType().toUpperCase(Locale.ROOT);
         String value = reply.actionValue() == null ? "" : reply.actionValue().trim();
+        String raw = (reply.actionType() + " " + value).trim().toLowerCase(Locale.ROOT);
+        // 容错：模型有时会漏掉 SOUND 关键字，直接写音效名（例如 ACTION: block.note_block.pling）
+        if (!type.equals("SOUND") && !type.equals("TITLE") && !type.equals("COMMAND")
+                && !type.equals("NONE") && plugin.allowedSounds().contains(raw)) {
+            type = "SOUND";
+            value = raw;
+        }
         if (value.isEmpty()) {
             return "empty";
         }
