@@ -8,6 +8,8 @@ deepseek:
   temperature: 1.35
   max-tokens: 180
   timeout-seconds: 25
+  # 连接失败时的重试次数（偶发超时很常见，重试一次基本能救回来）
+  retries: 1
 
 bot:
   # 公屏上的说话人前缀，效果是「幽灵：内容」

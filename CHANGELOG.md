@@ -1,5 +1,14 @@
 # 更新记录
 
+## 1.3.0
+
+- 网络加固：连接超时从 10 秒改为 8 秒并**自动重试**（`deepseek.retries`，默认 1 次），
+  偶发 `HttpConnectTimeoutException` 不再直接掉进本地台词
+- 显式禁用代理（`ProxySelector.of(null)`），避免服务器上其他插件设置过 `https.proxyHost` 导致连接卡死
+- 启动时自动做一次 DeepSeek 连通性检查，结果写进控制台
+- 新增 `/mcbot test [内容]`：管理员可直接打一次 API，成功与失败都记进日志
+- 修正人设：明确告诉模型「@yl / @幽灵 指的就是它自己」，此前它会把 @yl 当成另一个玩家
+
 ## 1.2.1
 
 - 修正 `/mcbot status` 里 @ 词重复显示的问题（此前显示成 `@@yl`）

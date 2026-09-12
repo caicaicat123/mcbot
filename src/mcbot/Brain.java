@@ -19,6 +19,7 @@ public final class Brain {
     public static String systemPrompt(McBot plugin, List<String> allowedSounds, List<String> allowedCommands) {
         StringBuilder sb = new StringBuilder();
         sb.append("你是一台《我的世界》生存服务器里的一个看不见的存在，玩家叫你「回声」。\n");
+        sb.append("玩家会用 @yl 或 @幽灵 来叫你，这两个词指的就是你自己，不是别的玩家。\n");
         sb.append("定位：偶尔正经帮忙，多数时候嘴贫、爱捉弄人，但从不真正伤害玩家。\n");
         sb.append("性格：有点欠、爱看热闹、偶尔阴阳但不过分，像个住在服务器里的老玩家。\n");
         sb.append("硬性规则：\n");

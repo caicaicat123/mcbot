@@ -80,6 +80,24 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
         }
         startLoop();
         getLogger().info("回声已就位。AI=" + (ai.configured() ? "开启" : "未配置，仅使用本地台词"));
+        checkConnectivity();
+    }
+
+    /** 启动时探一次网络，把结果写进控制台，省得等玩家 @ 了才发现连不上。 */
+    private void checkConnectivity() {
+        if (ai == null || !ai.configured()) {
+            return;
+        }
+        long started = System.currentTimeMillis();
+        ai.ping().whenComplete((code, error) -> {
+            long ms = System.currentTimeMillis() - started;
+            if (error != null) {
+                getLogger().warning("DeepSeek 连通性检查失败（" + ms + "ms）：" + error
+                        + " —— 被 @ 时会退回本地台词");
+            } else {
+                getLogger().info("DeepSeek 连通性正常（HTTP " + code + "，用时 " + ms + "ms）");
+            }
+        });
     }
 
     @Override
@@ -102,7 +120,8 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
                 cfg.getString("deepseek.model", "deepseek-chat"),
                 cfg.getDouble("deepseek.temperature", 1.35),
                 cfg.getInt("deepseek.max-tokens", 180),
-                cfg.getInt("deepseek.timeout-seconds", 25));
+                cfg.getInt("deepseek.timeout-seconds", 25),
+                Math.max(1, cfg.getInt("deepseek.retries", 1) + 1));
 
         colorPrefix = cfg.getString("bot.color-prefix", "§5[回声]§r ");
         aiChance = cfg.getDouble("bot.ai-chance", 0.55);
@@ -370,6 +389,33 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
                         + "引导窗口 " + guideWindowSeconds + " 秒");
                 sender.sendMessage("§7 音效 " + allowedSounds.size() + " 个；指令白名单："
                         + String.join(", ", allowedCommands));
+            }
+            case "test" -> {
+                if (!sender.hasPermission("mcbot.admin")) {
+                    sender.sendMessage("§c需要 mcbot.admin 权限。");
+                    return true;
+                }
+                if (ai == null || !ai.configured()) {
+                    sender.sendMessage(colorize("§c还没配置 deepseek.api-key。"));
+                    return true;
+                }
+                String text = args.length > 1
+                        ? String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                        : "你好";
+                sender.sendMessage(colorize("§7正在测试 DeepSeek 连通性……"));
+                long started = System.currentTimeMillis();
+                getLogger().info("[测试] 开始调用 DeepSeek：" + text);
+                ai.chat(Brain.systemPrompt(this, allowedSounds, allowedCommands),
+                        Brain.userPrompt("管理员正在做连通性测试，对他说：" + text, "（测试场景）"))
+                        .whenComplete((raw, error) -> {
+                            long ms = System.currentTimeMillis() - started;
+                            if (error != null) {
+                                getLogger().warning("[测试] 调用失败（" + ms + "ms）：" + error);
+                            } else {
+                                getLogger().info("[测试] 调用成功（" + ms + "ms）："
+                                        + raw.replace("\r", " ").replace("\n", " | "));
+                            }
+                        });
             }
             default -> sender.sendMessage(colorize("§c未知子命令。用法：/mcbot ask|poke|toggle|reload|status"));
         }

@@ -1,6 +1,7 @@
 package mcbot;
 
 import java.net.URI;
+import java.net.ProxySelector;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -10,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
 
 /** DeepSeek Chat Completions 的最小客户端。所有请求都是异步的。 */
 public final class DeepSeek {
@@ -21,16 +24,23 @@ public final class DeepSeek {
     private final double temperature;
     private final int maxTokens;
     private final int timeoutSeconds;
+    private final int maxAttempts;
 
     public DeepSeek(String apiKey, String baseUrl, String model, double temperature,
-                    int maxTokens, int timeoutSeconds) {
+                    int maxTokens, int timeoutSeconds, int maxAttempts) {
         this.apiKey = apiKey == null ? "" : apiKey.trim();
         this.baseUrl = baseUrl == null || baseUrl.isBlank() ? "https://api.deepseek.com" : baseUrl.trim();
         this.model = model == null || model.isBlank() ? "deepseek-chat" : model.trim();
         this.temperature = temperature;
         this.maxTokens = maxTokens;
         this.timeoutSeconds = timeoutSeconds;
-        this.http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+        this.maxAttempts = Math.max(1, maxAttempts);
+        // 显式不走代理：服务器上若有插件设置过 https.proxyHost，会让连接卡死到超时
+        this.http = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(8))
+                .proxy(ProxySelector.of(null))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
     }
 
     public boolean configured() {
@@ -38,6 +48,33 @@ public final class DeepSeek {
     }
 
     public CompletableFuture<String> chat(String systemPrompt, String userPrompt) {
+        return attempt(systemPrompt, userPrompt, 1);
+    }
+
+    /** 轻量连通性检查：不带密钥地打一次根路径，只看网络能不能通。 */
+    public CompletableFuture<Integer> ping() {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/"))
+                .timeout(Duration.ofSeconds(timeoutSeconds))
+                .GET()
+                .build();
+        return http.sendAsync(request, HttpResponse.BodyHandlers.discarding()).thenApply(HttpResponse::statusCode);
+    }
+
+    private CompletableFuture<String> attempt(String systemPrompt, String userPrompt, int tryNo) {
+        return send(systemPrompt, userPrompt).exceptionallyCompose(error -> {
+            if (tryNo < maxAttempts) {
+                return CompletableFuture
+                        .supplyAsync(() -> null,
+                                CompletableFuture.delayedExecutor(700L * tryNo, TimeUnit.MILLISECONDS))
+                        .thenCompose(ignored -> attempt(systemPrompt, userPrompt, tryNo + 1));
+            }
+            Throwable cause = error instanceof CompletionException && error.getCause() != null
+                    ? error.getCause() : error;
+            return CompletableFuture.failedFuture(cause);
+        });
+    }
+
+    private CompletableFuture<String> send(String systemPrompt, String userPrompt) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", model);
         body.put("messages", List.of(

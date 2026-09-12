@@ -8,7 +8,7 @@
 ## 安装
 
 1. 编译：`powershell -File build.ps1`（首次先跑 `node tools\fetch-libs.cjs` 下载编译依赖）
-2. 把 `dist\mcbot-1.2.1.jar` 放进服务器的 `plugins\` 目录
+2. 把 `dist\mcbot-1.3.0.jar` 放进服务器的 `plugins\` 目录
 3. 启动或重启服务器，会生成 `plugins\McBot\config.yml`
 4. 在配置里填 `deepseek.api-key`，然后 `/mcbot reload`（或重启）
 
@@ -23,6 +23,7 @@
 | `/mcbot toggle` | `mcbot.admin` | 暂停/恢复定时搞怪 |
 | `/mcbot reload` | `mcbot.admin` | 重载配置（改完 API Key 用这个） |
 | `/mcbot status` | 所有人 | 查看当前状态 |
+| `/mcbot test [内容]` | `mcbot.admin` | 直接打一次 API，结果写进控制台，用来排查连通性 |
 
 玩家在聊天里 `@yl` 或 `@幽灵` 它才会回话。其余聊天它完全不看——这是省钱的关键。
 
