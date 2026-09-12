@@ -366,7 +366,7 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
                 sender.sendMessage("§7 搞怪：" + (mischiefEnabled ? "开" : "关")
                         + "  间隔：" + intervalSeconds + "±" + jitterSeconds + " 秒"
                         + "  AI：" + (ai.configured() ? "已配置" : "未配置"));
-                sender.sendMessage("§7 只有被 @" + String.join(" / @", mentionTriggers) + " 才回复；"
+                sender.sendMessage("§7 只有被 " + String.join(" / ", mentionTriggers) + " 才回复；"
                         + "引导窗口 " + guideWindowSeconds + " 秒");
                 sender.sendMessage("§7 音效 " + allowedSounds.size() + " 个；指令白名单："
                         + String.join(", ", allowedCommands));
