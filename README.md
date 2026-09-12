@@ -8,7 +8,7 @@
 ## 安装
 
 1. 编译：`powershell -File build.ps1`（首次先跑 `node tools\fetch-libs.cjs` 下载编译依赖）
-2. 把 `dist\mcbot-1.1.0.jar` 放进服务器的 `plugins\` 目录
+2. 把 `dist\mcbot-1.1.1.jar` 放进服务器的 `plugins\` 目录
 3. 启动或重启服务器，会生成 `plugins\McBot\config.yml`
 4. 在配置里填 `deepseek.api-key`，然后 `/mcbot reload`（或重启）
 
@@ -50,8 +50,8 @@ fill/setblock/summon/gamemode/reload/plugman/execute` 这类指令永远不会�
 
 ## 调参与省钱
 
-- `bot.ai-chance`（默认 0.35）：公屏搞怪时走 AI 的比例，其余用本地台词。**设成 0 就是完全免费**——
-  公屏只念本地台词，只有玩家 @ 它时才调用 API。
+- `bot.ai-chance`（默认 0.35）：**只影响公屏自言自语**——走 AI 的比例，其余用本地台词。
+  设成 0 就是公屏完全免费。被 @ 或 `/mcbot ask` 时一定走 API，不受这个值影响。
 - `mention.triggers`：能唤起它的 @ 词，默认 `@yl` 和 `@幽灵`。
 - `guide.use-ai`：引导那句话是否也用 AI 生成，默认 false（固定文案，不花钱）。
 - `deepseek.max-tokens`（默认 180）：单次回复上限。它说的话本来就短，不用给多。

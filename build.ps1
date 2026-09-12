@@ -1,4 +1,4 @@
-# 编译 McBot：javac -> jar。产物在 dist\mcbot-1.1.0.jar
+# 编译 McBot：javac -> jar。产物在 dist\mcbot-1.1.1.jar
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $jdk = 'C:\Program Files\Java\jdk-21\bin'
@@ -22,6 +22,6 @@ if ($LASTEXITCODE -ne 0) { throw '编译失败' }
 Copy-Item (Join-Path $root 'plugin.yml') $classes -Force
 Copy-Item (Join-Path $root 'config.yml') $classes -Force
 
-$jar = Join-Path $dist 'mcbot-1.1.0.jar'
+$jar = Join-Path $dist 'mcbot-1.1.1.jar'
 & "$jdk\jar.exe" --create --file $jar -C $classes .
 Write-Output ("已生成: " + $jar + "  (" + [math]::Round((Get-Item $jar).Length / 1KB, 1) + " KB)")

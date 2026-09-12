@@ -176,7 +176,7 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
         }
         Player target = pool.get(random.nextInt(pool.size()));
         boolean quiet = random.nextDouble() < privateChance;
-        speak(target, "服务器里安静了一会儿，你想找点乐子", quiet);
+        speak(target, "服务器里安静了一会儿，你想找点乐子", quiet, false);
         if (!quiet && guideEnabled) {
             // 公屏说完话之后，盯住接下来的第一条玩家发言
             guideWindowUntil = System.currentTimeMillis() + guideWindowSeconds * 1000L;
@@ -196,11 +196,12 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
 
     // -------------------------------------------------------------- AI 交互
 
-    private void speak(Player target, String trigger, boolean quiet) {
+    /** @param forceAi true 时跳过概率过滤，一定走 API（被 @ 和玩家主动提问用这个）。 */
+    private void speak(Player target, String trigger, boolean quiet, boolean forceAi) {
         if (!isEnabled()) {
             return;
         }
-        if (ai != null && ai.configured() && random.nextDouble() < aiChance) {
+        if (ai != null && ai.configured() && (forceAi || random.nextDouble() < aiChance)) {
             String system = Brain.systemPrompt(this, allowedSounds, allowedCommands);
             String user = Brain.userPrompt(trigger, context(target));
             ai.chat(system, user).whenComplete((raw, error) -> {
@@ -273,7 +274,7 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
                 return;
             }
             lastReply.put(player.getUniqueId(), now);
-            speak(player, player.getName() + " 用 @ 对你说了：" + message, false);
+            speak(player, player.getName() + " 用 @ 对你说了：" + message, false, true);
             return;
         }
 
@@ -282,7 +283,7 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
             guideUsed = true;
             guideWindowUntil = 0L;
             if (guideUseAi) {
-                speak(player, player.getName() + " 接话了：" + message, false);
+                speak(player, player.getName() + " 接话了：" + message, false, true);
             } else {
                 Bukkit.broadcastMessage(colorize(colorPrefix + guideMessage));
             }
@@ -323,7 +324,7 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
                 }
                 lastReply.put(player.getUniqueId(), now);
                 player.sendMessage(colorize("§8……它在听着"));
-                speak(player, player.getName() + " 对你说：" + text, true);
+        speak(player, player.getName() + " 对你说：" + text, true, true);
             }
             case "poke" -> {
                 if (!sender.hasPermission("mcbot.admin")) {
@@ -335,13 +336,13 @@ public final class McBot extends JavaPlugin implements Listener, CommandExecutor
                     List<Player> pool = eligiblePlayers();
                     if (pool.isEmpty()) {
                         sender.sendMessage(colorize("§7现在没人在线，用空目标跑一次做自检。"));
-                        speak(null, "被管理员推了一把，服务器里空无一人", true);
+                        speak(null, "被管理员推了一把，服务器里空无一人", true, true);
                         return true;
                     }
                     target = pool.get(random.nextInt(pool.size()));
                 }
                 sender.sendMessage(colorize("§7正在让回声去找 " + target.getName() + " ……"));
-                speak(target, "被管理员推了一把，去找点乐子", false);
+                speak(target, "被管理员推了一把，去找点乐子", false, false);
             }
             case "toggle" -> {
                 if (!sender.hasPermission("mcbot.admin")) {
